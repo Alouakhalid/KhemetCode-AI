@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>KhemetCode API Playground</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#c9a227;--teal:#00c9a7;--bg:#060606;--panel:#0d0d0d;--card:#111;--border:#1e1e1e;--text:#e8e8e8;--muted:#555;--red:#e05252;--purple:#818cf8}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:24px 20px}
+.header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#c9a227,#6b4a00);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 25px #c9a22750;animation:glow 3s ease-in-out infinite;flex-shrink:0}
+@keyframes glow{0%,100%{box-shadow:0 0 20px #c9a22740}50%{box-shadow:0 0 40px #c9a22780}}
+.header-txt h1{font-size:22px;font-weight:800;background:linear-gradient(135deg,#c9a227,#e8c547,#00c9a7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-txt p{font-size:12px;color:var(--muted);margin-top:3px}
+.status-pill{margin-left:auto;display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px}
+.dot{width:7px;height:7px;border-radius:50%;background:#333;transition:.3s;flex-shrink:0}
+.dot.ok{background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.dot.ld{background:#f59e0b;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.grid{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(10px)}
+.panel-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px}
+.key-row{display:flex;gap:7px}
+input[type=text],input[type=password],textarea{background:#080808;border:1px solid #1a1a1a;color:var(--text);border-radius:9px;padding:10px 13px;font-size:13px;outline:none;font-family:'Inter',sans-serif;transition:.2s;width:100%}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{border-color:#c9a22750;box-shadow:0 0 0 2px #c9a22710}
+input::placeholder,textarea::placeholder{color:#2a2a2a}
+textarea{resize:vertical;min-height:90px;line-height:1.6}
+.eye-btn{background:#0d0d0d;border:1px solid #1a1a1a;color:var(--muted);border-radius:8px;padding:0 12px;cursor:pointer;font-size:14px;flex-shrink:0;transition:.2s}
+.eye-btn:hover{border-color:#c9a22750;color:var(--gold)}
+.validate-btn{background:linear-gradient(135deg,#1a2a1a,#0f1f0f);border:1px solid #6db33f30;color:#6db33f;border-radius:8px;padding:0 13px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;transition:.2s;white-space:nowrap}
+.validate-btn:hover{background:linear-gradient(135deg,#243a24,#182a18)}
+.key-ok{font-size:10px;margin-top:5px;padding:3px 0}
+.slider-row{display:flex;align-items:center;gap:10px}
+input[type=range]{-webkit-appearance:none;flex:1;height:3px;background:#1a1a1a;border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 8px #c9a22760}
+.val-label{font-size:12px;font-weight:700;color:var(--gold);min-width:36px;text-align:right;font-family:'JetBrains Mono',monospace}
+select{background:#080808;border:1px solid #1a1a1a;color:var(--text);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;cursor:pointer;width:100%}
+select:focus{border-color:#c9a22750}
+.gen-btn{width:100%;background:linear-gradient(135deg,#c9a227,#8b5e0a);border:none;border-radius:11px;padding:13px;color:#000;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;margin-top:4px;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:8px}
+.gen-btn:hover{transform:translateY(-1px);box-shadow:0 0 30px #c9a22750}
+.gen-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+.gen-btn.loading{animation:btnpulse 1s ease infinite}
+@keyframes btnpulse{0%,100%{opacity:1}50%{opacity:.6}}
+.res-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.lang-badge{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;padding:3px 10px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px}
+.copy-btn{margin-left:auto;background:#141414;border:1px solid #2a2a2a;color:var(--muted);border-radius:7px;padding:4px 11px;font-size:11px;cursor:pointer;transition:.2s}
+.copy-btn:hover{background:#1e1e1e;color:var(--teal);border-color:var(--teal)}
+.dots-row{display:flex;gap:5px;margin-bottom:8px}
+.dots-row span{width:10px;height:10px;border-radius:50%}
+.dots-row span:nth-child(1){background:#ff5f57}
+.dots-row span:nth-child(2){background:#ffbd2e}
+.dots-row span:nth-child(3){background:#28c840}
+.code-box{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:10px;overflow:hidden}
+.code-box pre{margin:0!important;border-radius:0!important}
+.code-box pre code{font-family:'JetBrains Mono',monospace!important;font-size:12.5px!important;line-height:1.75!important}
+.empty-res{text-align:center;padding:48px 20px;color:#2a2a2a}
+.empty-res .icon{font-size:40px;margin-bottom:12px}
+.empty-res p{font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border-radius:6px;padding:3px 9px;font-size:10px;font-weight:600}
+.chip.gold{background:#c9a22718;color:var(--gold);border:1px solid #c9a22730}
+.chip.teal{background:#00c9a718;color:var(--teal);border:1px solid #00c9a730}
+.chip.purple{background:#4f46e518;color:var(--purple);border:1px solid #4f46e530;font-family:'JetBrains Mono',monospace}
+.chip.grey{background:#1a1a1a;color:#555;border:1px solid #222}
+.hist-item{border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:.2s}
+.hist-item:hover{border-color:#c9a22730;background:#0f0f0f}
+.hist-prompt{font-size:12px;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:10px;color:var(--muted);display:flex;gap:8px}
+.json-toggle{background:none;border:1px solid #1a1a1a;color:var(--muted);border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;margin-top:10px;transition:.2s}
+.json-toggle:hover{border-color:#c9a22730;color:var(--text)}
+.json-box{background:#050505;border:1px solid #1a1a1a;border-radius:8px;padding:12px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#666;line-height:1.7;display:none;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.json-box::-webkit-scrollbar{width:3px}.json-box::-webkit-scrollbar-thumb{background:#222}
+.err-box{background:#1a0505;border:1px solid #e0525230;border-radius:9px;padding:12px 14px;color:var(--red);font-size:12px;margin-top:10px;display:none}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.server-url{font-size:10px;color:var(--muted);background:#080808;border:1px solid #1a1a1a;border-radius:7px;padding:5px 10px;font-family:'JetBrains Mono',monospace;margin-left:auto}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="wrap">
+  <div class="header">
+    <div class="logo-icon">𓂀</div>
+    <div class="header-txt">
+      <h1>KhemetCode API Playground</h1>
+      <p>Standalone tester — connects to model server at port 5050</p>
+    </div>
+    <span class="server-url">api → 127.0.0.1:5050</span>
+    <div class="status-pill">
+      <div class="dot ld" id="dot"></div>
+      <span id="stxt">Checking…</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <div class="panel-title">🔑 Authentication</div>
+        <div class="field">
+          <label>API Key</label>
+          <div class="key-row">
+            <input type="password" id="apikey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off"/>
+            <button class="eye-btn" onclick="toggleShow()" id="eye">👁</button>
+            <button class="validate-btn" onclick="validateKey()">Verify</button>
+          </div>
+          <div class="key-ok" id="keyok"></div>
+        </div>
+        <hr class="divider"/>
+        <div class="panel-title">📝 Prompt</div>
+        <div class="field">
+          <label>Natural Language Description</label>
+          <textarea id="prompt" placeholder="e.g. print hello world with python&#10;e.g. sort a list in ascending order&#10;e.g. check if a number is prime"></textarea>
+        </div>
+        <hr class="divider"/>
+        <div class="panel-title">⚙️ Parameters</div>
+        <div class="field">
+          <label>🌡 Temperature</label>
+          <div class="slider-row">
+            <input type="range" id="temp" min="0" max="2" step="0.05" value="0.8" oninput="document.getElementById('tempv').textContent=parseFloat(this.value).toFixed(2)"/>
+            <span class="val-label" id="tempv">0.80</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>🎯 Top-K (0 = off)</label>
+          <div class="slider-row">
+            <input type="range" id="topk" min="0" max="50" step="1" value="0" oninput="document.getElementById('topkv').textContent=this.value==0?'Off':this.value"/>
+            <span class="val-label" id="topkv">Off</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>📏 Max Output Tokens</label>
+          <select id="maxlen">
+            <option value="50">50 tokens</option>
+            <option value="100">100 tokens</option>
+            <option value="150" selected>150 tokens</option>
+            <option value="200">200 tokens</option>
+          </select>
+        </div>
+        <button class="gen-btn" id="genbtn" onclick="generate()" disabled>
+          <span id="genbtn-txt">⟶ Generate Code</span>
+        </button>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-title">🕓 Session History</div>
+        <div id="hist-list"><div style="color:var(--muted);font-size:12px">No generations yet.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="res-panel">
+      <div id="res-empty" class="empty-res">
+        <div class="icon">𓆣</div>
+        <p>Enter your API key and a prompt,<br/>then click <strong>Generate Code</strong></p>
+      </div>
+      <div id="res-content" style="display:none">
+        <div class="res-header">
+          <div class="dots-row"><span></span><span></span><span></span></div>
+          <span class="lang-badge" id="lang-badge">—</span>
+          <button class="copy-btn" onclick="copyCode()">Copy</button>
+        </div>
+        <div class="code-box">
+          <pre><code id="code-el" class="language-java"></code></pre>
+        </div>
+        <div class="chips" id="chips-row"></div>
+        <div class="err-box" id="err-box"></div>
+        <button class="json-toggle" onclick="toggleJson()">{ } Raw JSON</button>
+        <div class="json-box" id="json-box"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:5050";
+
+(function(){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  let W,H,p=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;p=Array.from({length:50},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()+.3,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:Math.random()}));}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){const dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.strokeStyle=`rgba(201,162,39,${.07*(1-d/120)})`;ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(p[i].x,p[i].y);ctx.lineTo(p[j].x,p[j].y);ctx.stroke();}}
+    p.forEach(pt=>{pt.x+=pt.vx;pt.y+=pt.vy;if(pt.x<0)pt.x=W;if(pt.x>W)pt.x=0;if(pt.y<0)pt.y=H;if(pt.y>H)pt.y=0;ctx.beginPath();ctx.arc(pt.x,pt.y,pt.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,162,39,${pt.a*.35})`;ctx.fill();});
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);resize();draw();
+})();
+
+async function poll(){
+  try{
+    const r=await fetch(API+'/api/status'),d=await r.json();
+    const dot=document.getElementById('dot'),st=document.getElementById('stxt');
+    if(d.model_ready){dot.className='dot ok';st.textContent='Model Ready';document.getElementById('genbtn').disabled=false;}
+    else{dot.className='dot ld';st.textContent='Model Loading…';setTimeout(poll,2500);}
+  }catch{document.getElementById('stxt').textContent='Server offline';setTimeout(poll,4000);}
+}
+poll();
+
+function toggleShow(){
+  const inp=document.getElementById('apikey');
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+async function validateKey(){
+  const key=document.getElementById('apikey').value.trim();
+  const el=document.getElementById('keyok');
+  if(!key){el.style.color='var(--red)';el.textContent='⚠ Enter a key first';return;}
+  el.style.color='var(--muted)';el.textContent='Checking…';
+  try{
+    const r=await fetch(API+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json','X-API-Key':key},body:JSON.stringify({text:'test',temperature:1,max_len:10})});
+    if(r.status===401){el.style.color='var(--red)';el.textContent='❌ Invalid or revoked key';}
+    else{el.style.color='var(--teal)';el.textContent='✅ Key is valid & active';}
+  }catch{el.style.color='var(--red)';el.textContent='⚠ Could not reach server';}
+}
+
+function detectLang(c){
+  if(/\bdef\s+\w+\s*\(/.test(c)||/\bprint\s*\(/.test(c)||/\bimport\s+\w/.test(c)||/\belif\b/.test(c))return{label:'Python',cls:'language-python'};
+  if(/:\s*(string|number|boolean)\b/.test(c)||/\binterface\s+\w/.test(c))return{label:'TypeScript',cls:'language-typescript'};
+  if(/\bconst\s+\w/.test(c)||/\blet\s+\w/.test(c)||/console\.log/.test(c)||/=>/.test(c))return{label:'JavaScript',cls:'language-javascript'};
+  if(/\bfunc\s+\w/.test(c)||/\bpackage\s+\w/.test(c)||/:=/.test(c))return{label:'Go',cls:'language-go'};
+  if(/#include/.test(c)||/std::/.test(c))return{label:'C++',cls:'language-cpp'};
+  return{label:'Java',cls:'language-java'};
+}
+
+const history=[];
+function addHistory(prompt,code,metrics){
+  history.unshift({prompt,code,metrics,time:new Date()});
+  if(history.length>10)history.pop();
+  const el=document.getElementById('hist-list');
+  el.innerHTML=history.map((h,i)=>`
+    <div class="hist-item" onclick="loadHistory(${i})">
+      <div class="hist-prompt">${esc(h.prompt)}</div>
+      <div class="hist-meta"><span>${h.metrics.lines}L · CC${h.metrics.complexity}</span><span>${h.time.toLocaleTimeString()}</span></div>
+    </div>`).join('');
+}
+function loadHistory(i){const h=history[i];document.getElementById('prompt').value=h.prompt;showCode(h.code,h.metrics,null);}
+
+async function generate(){
+  const key=document.getElementById('apikey').value.trim();
+  const prompt=document.getElementById('prompt').value.trim();
+  if(!key){document.getElementById('keyok').style.color='var(--red)';document.getElementById('keyok').textContent='⚠ Enter your API key first';return;}
+  if(!prompt)return;
+  const btn=document.getElementById('genbtn'),btntxt=document.getElementById('genbtn-txt');
+  btn.disabled=true;btn.classList.add('loading');btntxt.textContent='⏳ Generating…';
+  const temp=parseFloat(document.getElementById('temp').value);
+  const topk=parseInt(document.getElementById('topk').value)||0;
+  const maxlen=parseInt(document.getElementById('maxlen').value);
+  try{
+    const r=await fetch(API+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json','X-API-Key':key},body:JSON.stringify({text:prompt,temperature:temp,top_k:topk,max_len:maxlen})});
+    const d=await r.json();
+    if(r.status===401){showError('❌ Invalid or revoked API key (401)');return;}
+    if(d.error){showError('❌ '+d.error);return;}
+    showCode(d.code,d.metrics||{},d);
+    addHistory(prompt,d.code,d.metrics||{lines:0,complexity:1});
+    document.getElementById('json-box').textContent=JSON.stringify(d,null,2);
+  }catch(e){showError('❌ Could not reach server: '+e.message);}
+  finally{btn.disabled=false;btn.classList.remove('loading');btntxt.textContent='⟶ Generate Code';}
+}
+
+function showCode(code,metrics,raw){
+  document.getElementById('res-empty').style.display='none';
+  document.getElementById('res-content').style.display='block';
+  document.getElementById('err-box').style.display='none';
+  const {label,cls}=detectLang(code);
+  document.getElementById('lang-badge').textContent=label;
+  const el=document.getElementById('code-el');
+  el.className=cls;el.textContent=code;hljs.highlightElement(el);
+  document.getElementById('chips-row').innerHTML=`
+    <span class="chip gold">🌡 ${raw?raw.temperature?.toFixed(2):'—'}</span>
+    ${metrics.lines?`<span class="chip purple">📊 ${metrics.lines}L · ${metrics.tokens}T · CC${metrics.complexity}</span>`:''}
+    ${raw?.top_k>0?`<span class="chip teal">🎯 Top-${raw.top_k}</span>`:''}
+    <span class="chip grey">${new Date().toLocaleTimeString()}</span>`;
+}
+
+function showError(msg){
+  document.getElementById('res-empty').style.display='none';
+  document.getElementById('res-content').style.display='block';
+  const eb=document.getElementById('err-box');eb.style.display='block';eb.textContent=msg;
+}
+
+function copyCode(){
+  navigator.clipboard.writeText(document.getElementById('code-el').textContent).then(()=>{
+    const b=document.querySelector('.copy-btn');b.textContent='✓ Copied';setTimeout(()=>b.textContent='Copy',2000);
+  });
+}
+
+function toggleJson(){
+  const b=document.getElementById('json-box');b.style.display=b.style.display==='none'?'block':'none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)generate();});
+
+const urlKey=new URLSearchParams(location.search).get('key');
+if(urlKey)document.getElementById('apikey').value=urlKey;
+</script>
+</body>
+</html>

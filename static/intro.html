@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>KhemetCode AI – Enter the Oracle</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:#e8e8e8;font-family:'Inter',sans-serif;height:100vh;overflow:hidden;cursor:default}
+canvas{position:fixed;inset:0;z-index:0}
+
+#scene{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+
+/* Pyramid SVG */
+.pyramid-wrap{margin-bottom:32px;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.pyramid-wrap svg{filter:drop-shadow(0 0 30px #c9a22780)}
+
+/* Glyph ring */
+.glyph-ring{position:absolute;width:340px;height:340px;border-radius:50%;border:1px solid #c9a22720;animation:spin 20s linear infinite}
+.glyph-ring span{position:absolute;font-size:18px;color:#c9a22750;transition:.3s}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* Title */
+.title-wrap{margin-bottom:8px}
+.khemet{font-size:52px;font-weight:800;background:linear-gradient(135deg,#c9a227 0%,#e8c547 40%,#00c9a7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;animation:shimmer 5s ease infinite}
+@keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+.sub{font-size:13px;color:#555;letter-spacing:4px;text-transform:uppercase;margin-bottom:32px}
+
+/* Hieroglyph line */
+.hieroline{font-size:22px;color:#c9a22730;letter-spacing:10px;margin-bottom:36px;animation:fade 3s ease-in-out infinite}
+@keyframes fade{0%,100%{opacity:.3}50%{opacity:.8}}
+
+/* Enter button */
+.enter-btn{position:relative;background:transparent;border:1px solid #c9a22760;color:var(--gold,#c9a227);font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:16px 48px;border-radius:2px;cursor:pointer;transition:.3s;overflow:hidden;font-family:'Inter',sans-serif}
+.enter-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#c9a22700,#c9a22720,#c9a22700);transform:translateX(-100%);transition:.5s}
+.enter-btn:hover::before{transform:translateX(100%)}
+.enter-btn:hover{border-color:var(--gold,#c9a227);box-shadow:0 0 40px #c9a22740,inset 0 0 20px #c9a22710;color:#e8c547}
+.enter-btn:active{transform:scale(.97)}
+
+/* Corners */
+.corner{position:fixed;font-size:24px;color:#c9a22720;pointer-events:none}
+.corner.tl{top:20px;left:24px}.corner.tr{top:20px;right:24px}
+.corner.bl{bottom:20px;left:24px}.corner.br{bottom:20px;right:24px}
+
+/* Loading bar */
+.load-bar{width:200px;height:2px;background:#111;border-radius:1px;margin:24px auto 0;overflow:hidden}
+.load-fill{height:100%;background:linear-gradient(90deg,#c9a227,#00c9a7);border-radius:1px;width:0;transition:width .1s linear}
+.load-txt{font-size:10px;color:#444;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+
+/* Particles burst on enter */
+.particle{position:fixed;pointer-events:none;border-radius:50%;animation:burst .8s ease forwards}
+@keyframes burst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+
+/* Fade out */
+.fade-out{animation:fadeScene .6s ease forwards}
+@keyframes fadeScene{to{opacity:0;transform:scale(1.04)}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="scene">
+  <div class="glyph-ring" id="ring"></div>
+
+  <div class="pyramid-wrap">
+    <svg width="160" height="120" viewBox="0 0 160 120">
+      <defs>
+        <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#c9a227"/>
+          <stop offset="100%" stop-color="#6b4a00"/>
+        </linearGradient>
+        <linearGradient id="pg2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#c9a22780"/>
+          <stop offset="100%" stop-color="#c9a22720"/>
+        </linearGradient>
+      </defs>
+      <!-- Pyramid faces -->
+      <polygon points="80,4 155,114 80,90" fill="url(#pg)" opacity=".9"/>
+      <polygon points="80,4 5,114 80,90" fill="url(#pg2)" opacity=".7"/>
+      <polygon points="5,114 155,114 80,90" fill="#0a0a0a" opacity=".95"/>
+      <!-- Eye of Horus in centre -->
+      <text x="80" y="72" text-anchor="middle" font-size="22" fill="#c9a227" opacity=".9">𓂀</text>
+      <!-- Glow line at base -->
+      <line x1="5" y1="114" x2="155" y2="114" stroke="#c9a22760" stroke-width="1"/>
+    </svg>
+  </div>
+
+  <div class="title-wrap">
+    <div class="khemet">KhemetCode</div>
+  </div>
+  <div class="sub">Egyptian AI Oracle &bull; Text → Code</div>
+  <div class="hieroline">𓂀 𓆣 𓅓 𓃭 𓆏 𓀭 𓁹</div>
+
+  <button class="enter-btn" id="enterbtn" onclick="enterOracle()">⟶ &nbsp;Enter the Oracle</button>
+
+  <div class="load-bar"><div class="load-fill" id="lf"></div></div>
+  <div class="load-txt" id="ltxt">Loading model…</div>
+</div>
+
+<div class="corner tl">𓂀</div>
+<div class="corner tr">𓆣</div>
+<div class="corner bl">𓅓</div>
+<div class="corner br">𓃭</div>
+
+<script>
+/* ── Canvas: starfield + code rain ── */
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H,stars=[],drops=[];
+const GLYPHS='𓂀𓆣𓅓𓃭𓆏𓀭𓁹𓄀𓅔𓆑𓇯𓈖𓉔𓊃𓋴𓌀𓍀𓎛𓏛𓐍'.split('');
+function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;init()}
+function init(){
+  stars=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1+.2,a:Math.random(),v:Math.random()*.3+.1}));
+  drops=Array.from({length:25},()=>({x:Math.random()*W,y:Math.random()*H-H,spd:Math.random()*1+.4,chars:Array.from({length:15},()=>GLYPHS[Math.floor(Math.random()*GLYPHS.length)]),tick:0}));
+}
+function draw(){
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(0,0,W,H);
+  stars.forEach(s=>{
+    s.a+=s.v*.015;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(201,162,39,${Math.abs(Math.sin(s.a))*.5})`;ctx.fill();
+  });
+  drops.forEach(d=>{
+    d.tick++;if(d.tick%6===0)d.chars.unshift(GLYPHS[Math.floor(Math.random()*GLYPHS.length)]);
+    d.y+=d.spd;if(d.y>H+300)d.y=-300;
+    ctx.font='14px "JetBrains Mono",monospace';
+    d.chars.slice(0,12).forEach((ch,i)=>{
+      const a=Math.max(0,.22-i*.018);
+      ctx.fillStyle=i===0?`rgba(0,201,167,${a*2})`:`rgba(201,162,39,${a})`;
+      ctx.fillText(ch,d.x,d.y+i*16);
+    });
+  });
+  requestAnimationFrame(draw);
+}
+window.addEventListener('resize',resize);resize();draw();
+
+/* ── Glyph ring ── */
+const ring=document.getElementById('ring');
+const ringGlyphs='𓂀𓆣𓅓𓃭𓆏𓀭𓁹𓄀𓅔𓆑𓇯𓈖'.split('');
+ringGlyphs.forEach((g,i)=>{
+  const s=document.createElement('span');
+  const angle=(i/ringGlyphs.length)*Math.PI*2-Math.PI/2;
+  const r=160;
+  s.style.left=(r+r*Math.cos(angle)+10)+'px';
+  s.style.top=(r+r*Math.sin(angle)+10)+'px';
+  s.style.transform=`translate(-50%,-50%) rotate(${(i/ringGlyphs.length)*360}deg)`;
+  s.textContent=g;ring.appendChild(s);
+});
+
+/* ── Model status loading bar ── */
+let loaded=false;
+const lf=document.getElementById('lf'),lt=document.getElementById('ltxt');
+async function pollStatus(){
+  try{
+    const r=await fetch('/api/status'),d=await r.json();
+    if(d.model_ready){
+      lf.style.width='100%';lt.textContent='Oracle ready — click to enter';
+      document.getElementById('enterbtn').style.boxShadow='0 0 40px #c9a22760,inset 0 0 20px #c9a22715';
+      loaded=true;
+    }else{
+      // animate bar up to 90%
+      const cur=parseFloat(lf.style.width)||0;
+      if(cur<88)lf.style.width=(cur+Math.random()*4+1)+'%';
+      lt.textContent='Loading KhemetCode model…';
+      setTimeout(pollStatus,2000);
+    }
+  }catch{setTimeout(pollStatus,3000);}
+}
+pollStatus();
+
+/* ── Particle burst ── */
+function burst(cx,cy){
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');p.className='particle';
+    const ang=Math.random()*Math.PI*2,dist=80+Math.random()*120;
+    p.style.cssText=`left:${cx}px;top:${cy}px;width:${2+Math.random()*4}px;height:${2+Math.random()*4}px;background:${Math.random()>.5?'#c9a227':'#00c9a7'};--dx:${Math.cos(ang)*dist}px;--dy:${Math.sin(ang)*dist}px`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),900);
+  }
+}
+
+/* ── Enter ── */
+function enterOracle(){
+  const btn=document.getElementById('enterbtn');
+  const rect=btn.getBoundingClientRect();
+  burst(rect.left+rect.width/2,rect.top+rect.height/2);
+  setTimeout(()=>{
+    document.getElementById('scene').classList.add('fade-out');
+    setTimeout(()=>location.href='/chat',600);
+  },200);
+}
+
+// Also skip with Enter key
+document.addEventListener('keydown',e=>{if(e.key==='Enter')enterOracle();});
+// Auto-enter after 12s if model ready
+setTimeout(()=>{if(loaded)enterOracle();},12000);
+</script>
+</body>
+</html>

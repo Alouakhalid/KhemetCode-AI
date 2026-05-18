@@ -284,9 +284,10 @@ def generate_code(nl_text, max_len=200, temperature=1.0, top_k=0):
     global transformer, encoder_sp, decoder_sp
 
     enc_seq = encode_and_pad(encoder_sp, [clean_text(nl_text)], MAX_ENC_LEN)
-    dec_seq = np.array([[BOS_ID] + [PAD_ID] * (MAX_DEC_LEN - 2)], dtype=np.int32)
+    dec_seq = np.array([[BOS_ID] + [PAD_ID] * (MAX_DEC_LEN - 1)], dtype=np.int32)
 
-    for i in range(1, max_len):
+    effective_len = min(max_len, MAX_DEC_LEN - 1)
+    for i in range(1, effective_len):
         preds  = transformer((enc_seq, dec_seq[:, :-1]), training=False)
         logits = preds[0, i - 1, :].numpy().astype(np.float64)
 
@@ -741,4 +742,4 @@ def delete_learned_pair():
 
 if __name__ == "__main__":
     load_model()
-    app.run(host="0.0.0.0", port=5050, debug=False)
+    app.run(host="0.0.0.0", port=5052, debug=False)

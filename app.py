@@ -283,36 +283,70 @@ def generate_code(nl_text, max_len=200, temperature=1.0, top_k=0):
     """Generate code from natural language description."""
     global transformer, encoder_sp, decoder_sp
 
+    REPETITION_PENALTY = 1.3
+    NGRAM_BLOCK_SIZE   = 3
+    MAX_CONSECUTIVE    = 4
+
+    if top_k <= 0:
+        top_k = 40
+
     enc_seq = encode_and_pad(encoder_sp, [clean_text(nl_text)], MAX_ENC_LEN)
     dec_seq = np.array([[BOS_ID] + [PAD_ID] * (MAX_DEC_LEN - 1)], dtype=np.int32)
+
+    generated_ids  = []
+    consecutive    = 0
+    prev_id        = -1
 
     effective_len = min(max_len, MAX_DEC_LEN - 1)
     for i in range(1, effective_len):
         preds  = transformer((enc_seq, dec_seq[:, :-1]), training=False)
         logits = preds[0, i - 1, :].numpy().astype(np.float64)
 
-        # Temperature scaling
-        if temperature != 1.0 and temperature > 0:
-            logits = logits / temperature
+        # ── Repetition penalty: discount tokens already generated ──
+        for tid in set(generated_ids):
+            if logits[tid] > 0:
+                logits[tid] /= REPETITION_PENALTY
+            else:
+                logits[tid] *= REPETITION_PENALTY
 
-        # Top-K filtering
+        # ── N-gram blocking: ban token that would repeat a trigram ──
+        if len(generated_ids) >= NGRAM_BLOCK_SIZE - 1:
+            ngram_prefix = tuple(generated_ids[-(NGRAM_BLOCK_SIZE - 1):])
+            for j in range(len(generated_ids) - NGRAM_BLOCK_SIZE + 1):
+                if tuple(generated_ids[j:j + NGRAM_BLOCK_SIZE - 1]) == ngram_prefix:
+                    banned = generated_ids[j + NGRAM_BLOCK_SIZE - 1]
+                    logits[banned] = -1e9
+
+        # ── Temperature scaling ──
+        if temperature > 0:
+            logits = logits / max(temperature, 0.1)
+
+        # ── Top-K filtering ──
         if top_k > 1:
-            thresh = np.sort(logits)[::-1][top_k - 1]
+            thresh = np.sort(logits)[::-1][min(top_k - 1, len(logits) - 1)]
             logits[logits < thresh] = -1e9
 
-        if temperature <= 0 or (temperature == 1.0 and top_k == 0):
-            next_id = int(np.argmax(logits))
-        else:
-            probs   = np.exp(logits - np.max(logits))
-            probs  /= probs.sum()
-            next_id = int(np.random.choice(len(probs), p=probs))
+        # ── Sampling ──
+        probs   = np.exp(logits - np.max(logits))
+        probs  /= probs.sum()
+        next_id = int(np.random.choice(len(probs), p=probs))
 
         if next_id == EOS_ID:
             break
-        dec_seq[0, i] = next_id
 
-    tokens = dec_seq[0, 1:].tolist()
-    tokens = [t for t in tokens if t not in (PAD_ID, EOS_ID)]
+        # ── Early stop on consecutive repeats ──
+        if next_id == prev_id:
+            consecutive += 1
+            if consecutive >= MAX_CONSECUTIVE:
+                break
+        else:
+            consecutive = 0
+        prev_id = next_id
+
+        dec_seq[0, i] = next_id
+        generated_ids.append(next_id)
+
+    tokens = [t for t in generated_ids if t not in (PAD_ID, EOS_ID, BOS_ID)]
     return decoder_sp.decode(tokens)
 
 
